@@ -4,6 +4,8 @@ plugins {
     id 'java'
 }
 
+apply plugin: 'checkstyle'
+
 group = 'az.gdg'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
@@ -20,6 +22,10 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+checkstyle {
+    toolVersion '8.14'
 }
 
 dependencies {

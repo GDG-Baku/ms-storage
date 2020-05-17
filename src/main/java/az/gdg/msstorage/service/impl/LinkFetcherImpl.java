@@ -77,7 +77,8 @@ public class LinkFetcherImpl implements LinkFetcher {
 
         if (folder.getFiles() != null && !folder.getFiles().isEmpty()) {
             FileList result = driveConfig.getDrive().files().list()
-                    .setQ("'" + folder.getFiles().get(0).getId() + "' in parents and mimeType contains '" + mimeType + "'")
+                    .setQ("'" + folder.getFiles().get(0)
+                            .getId() + "' in parents and mimeType contains '" + mimeType + "'")
                     .setFields("nextPageToken, files(id, trashed, name, mimeType, thumbnailLink, webViewLink)")
                     .execute();
 

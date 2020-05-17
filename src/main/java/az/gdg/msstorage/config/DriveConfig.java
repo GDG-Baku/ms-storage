@@ -20,7 +20,6 @@ public class DriveConfig {
     private static final String APPLICATION_NAME = "ms-storage";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
-    private NetHttpTransport HTTP_TRANSPORT;
 
 
     private GoogleCredential getCredentials() throws IOException {
@@ -30,9 +29,8 @@ public class DriveConfig {
     }
 
     public Drive getDrive() throws GeneralSecurityException, IOException {
-        HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-
-        return new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials())
+        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        return new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
