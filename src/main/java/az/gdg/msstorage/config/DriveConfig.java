@@ -7,6 +7,9 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -16,6 +19,8 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
 public class DriveConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(DriveConfig.class);
 
     private static final String APPLICATION_NAME = "ms-storage";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -28,10 +33,19 @@ public class DriveConfig {
         return GoogleCredential.fromStream(stream).createScoped(SCOPES);
     }
 
-    public Drive getDrive() throws GeneralSecurityException, IOException {
-        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        return new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
-                .setApplicationName(APPLICATION_NAME)
-                .build();
+    public Drive getDrive() {
+        logger.info("ActionLog.getDrive.start");
+        try {
+            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            Drive drive = new Drive.Builder(httpTransport, JSON_FACTORY, getCredentials())
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+            logger.info("ActionLog.getDrive.success");
+            return drive;
+        } catch (GeneralSecurityException | IOException exception) {
+            logger.error("ActionLog.getDrive.exception", exception.getCause());
+        }
+        logger.info("ActionLog.getDrive.end");
+        return null;
     }
 }
