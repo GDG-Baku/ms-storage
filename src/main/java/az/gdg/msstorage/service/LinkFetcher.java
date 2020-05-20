@@ -13,4 +13,5 @@ public interface LinkFetcher {
 
     JSONObject uploadFile(String folderName, MultipartFile multipartFile);
 
+    void deleteFile(String id);
 }

@@ -106,6 +106,16 @@ public class LinkFetcherImpl implements LinkFetcher {
         throw new FileCreationException("File couldn't be created");
     }
 
+    @Override
+    public void deleteFile(String id) {
+        DriveConfig driveConfig = new DriveConfig();
+        try {
+            driveConfig.getDrive().files().delete(id).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String createFolder(String folderName) {
         DriveConfig driveConfig = new DriveConfig();
 
