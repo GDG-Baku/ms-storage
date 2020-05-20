@@ -40,6 +40,8 @@ dependencies {
     compile 'com.google.apis:google-api-services-drive:v3-rev110-1.23.0'
 
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 }
 
 test {
