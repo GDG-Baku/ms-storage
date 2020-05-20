@@ -30,21 +30,21 @@ public class LinkFetcherController {
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @GetMapping("/team-images")
-    public ResponseEntity getImages() {
-        return new ResponseEntity<Map>(linkFetcher.getImages(), HttpStatus.OK);
+    public ResponseEntity<Map<String, String>> getImages() {
+        return new ResponseEntity<>(linkFetcher.getImages(), HttpStatus.OK);
     }
 
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @GetMapping("/terms-and-conditions")
-    public ResponseEntity getTermsAndConditions() {
-        return new ResponseEntity<JSONObject>(linkFetcher.getTermsAndConditions(), HttpStatus.OK);
+    public ResponseEntity<JSONObject> getTermsAndConditions() {
+        return new ResponseEntity<>(linkFetcher.getTermsAndConditions(), HttpStatus.OK);
     }
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @PostMapping("/upload")
-    public ResponseEntity uploadFile(@RequestParam String folderName,
-                                     @RequestPart MultipartFile multipartFile) {
+    public ResponseEntity<JSONObject> uploadFile(@RequestParam String folderName,
+                                                 @RequestPart MultipartFile multipartFile) {
         return new ResponseEntity<>(linkFetcher.uploadFile(folderName, multipartFile), HttpStatus.OK);
     }
 
