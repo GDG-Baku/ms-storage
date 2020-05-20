@@ -1,4 +1,4 @@
-package az.gdg.msstorage.config;
+package az.gdg.msstorage.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,22 +18,22 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
-public class DriveConfig {
+public class DriveUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(DriveConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(DriveUtil.class);
 
     private static final String APPLICATION_NAME = "ms-storage";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
 
 
-    private GoogleCredential getCredentials() throws IOException {
+    private static GoogleCredential getCredentials() throws IOException {
         String st = System.getenv("GOOGLE_CREDENTIALS");
         InputStream stream = new ByteArrayInputStream(st.getBytes());
         return GoogleCredential.fromStream(stream).createScoped(SCOPES);
     }
 
-    public Drive getDrive() {
+    public static Drive getDrive() {
         logger.info("ActionLog.getDrive.start");
         try {
             NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();

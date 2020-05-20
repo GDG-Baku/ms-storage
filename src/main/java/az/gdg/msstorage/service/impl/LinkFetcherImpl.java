@@ -1,9 +1,9 @@
 package az.gdg.msstorage.service.impl;
 
-import az.gdg.msstorage.config.DriveConfig;
 import az.gdg.msstorage.exception.FileCreationException;
 import az.gdg.msstorage.exception.NoFilesFoundException;
 import az.gdg.msstorage.service.LinkFetcher;
+import az.gdg.msstorage.util.DriveUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -77,7 +77,6 @@ public class LinkFetcherImpl implements LinkFetcher {
     @Override
     public JSONObject uploadFile(String folderName, MultipartFile multipartFile) {
         logger.info("ActionLog.uploadFile.start");
-        DriveConfig driveConfig = new DriveConfig();
         JSONObject jsonObject = new JSONObject();
         String fileName = UUID.randomUUID().toString();
         String parentFolderId = getFolderIdByName(folderName);
@@ -92,7 +91,7 @@ public class LinkFetcherImpl implements LinkFetcher {
 
         File file = null;
         try {
-            file = driveConfig.getDrive().files().create(fileMetadata,
+            file = DriveUtil.getDrive().files().create(fileMetadata,
                     new InputStreamContent(multipartFile.getContentType(),
                             new ByteArrayInputStream(multipartFile.getBytes())))
                     .setFields("id")
@@ -113,19 +112,36 @@ public class LinkFetcherImpl implements LinkFetcher {
     @Override
     public void deleteFile(String id) {
         logger.info("ActionLog.deleteFile.start with id {}", id);
-        DriveConfig driveConfig = new DriveConfig();
         try {
-            driveConfig.getDrive().files().delete(id).execute();
+            if (isFileExist(id)) {
+                DriveUtil.getDrive().files().delete(id).execute();
+            } else {
+                throw new NoFilesFoundException("File doesn't exist with this id " + id);
+            }
             logger.info("ActionLog.deleteFile.success with id {}", id);
-        } catch (IOException e) {
-            logger.error("ActionLog.deleteFile.exception", e);
+        } catch (IOException exception) {
+            logger.error("ActionLog.deleteFile.exception", exception);
         }
         logger.info("ActionLog.deleteFile.end with id {}", id);
     }
 
+    private boolean isFileExist(String id) {
+        logger.info("ActionLog.isFileExist.start with id {}", id);
+        File file = null;
+        try {
+            file = DriveUtil.getDrive().files().get(id)
+                    .setFields("nextPageToken, files(id, name)")
+                    .execute();
+
+        } catch (IOException exception) {
+            logger.error("ActionLog.isFileExist.exception", exception);
+        }
+        logger.info("ActionLog.deleteFile.end with id {}", id);
+        return file != null;
+    }
+
     public String createFolder(String folderName) {
         logger.info("ActionLog.createFolder.start with folderName {}", folderName);
-        DriveConfig driveConfig = new DriveConfig();
 
         Permission adminPermission = new Permission();
         adminPermission.setRole("reader");
@@ -142,9 +158,9 @@ public class LinkFetcherImpl implements LinkFetcher {
 
         File file = null;
         try {
-            file = driveConfig.getDrive().files().create(fileMetadata).execute();
-            driveConfig.getDrive().permissions().create(file.getId(), adminPermission).execute();
-            driveConfig.getDrive().permissions().create(file.getId(), userPermission).execute();
+            file = DriveUtil.getDrive().files().create(fileMetadata).execute();
+            DriveUtil.getDrive().permissions().create(file.getId(), adminPermission).execute();
+            DriveUtil.getDrive().permissions().create(file.getId(), userPermission).execute();
         } catch (IOException exception) {
             logger.error("ActionLog.createFolder.exception", exception);
         }
@@ -158,10 +174,9 @@ public class LinkFetcherImpl implements LinkFetcher {
 
     private List<File> getFilesInParticularFolder(String folderName, String mimeType) throws IOException {
         logger.info("ActionLog.getFilesInParticularFolder.start with folderName {}", folderName);
-        DriveConfig driveConfig = new DriveConfig();
         String folderId = getFolderIdByName(folderName);
 
-        FileList result = driveConfig.getDrive().files().list()
+        FileList result = DriveUtil.getDrive().files().list()
                 .setQ("'" + folderId + "' in parents and mimeType contains '" + mimeType + "'")
                 .setFields("nextPageToken, files(id, trashed, name, mimeType)")
                 .execute();
@@ -177,10 +192,9 @@ public class LinkFetcherImpl implements LinkFetcher {
 
     private String getFolderIdByName(String folderName) {
         logger.info("ActionLog.getFolderIdByName.start with folderName {}", folderName);
-        DriveConfig driveConfig = new DriveConfig();
         FileList folders = null;
         try {
-            folders = driveConfig.getDrive().files().list()
+            folders = DriveUtil.getDrive().files().list()
                     .setQ("mimeType='application/vnd.google-apps.folder' and name='" + folderName + "' and trashed=false")
                     .setPageSize(1)
                     .setFields("nextPageToken, files(id, name)")
@@ -190,7 +204,6 @@ public class LinkFetcherImpl implements LinkFetcher {
             logger.error("ActionLog.getFolderIdByName.exception", exception);
         }
         if (folders != null && !folders.getFiles().isEmpty()) {
-            logger.info("ActionLog.getFolderIdByName.success with folderName {}", folderName);
             return folders.getFiles().get(0).getId();
         }
         logger.info("ActionLog.getFolderIdByName.end with folderName {}", folderName);
