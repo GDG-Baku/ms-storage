@@ -43,7 +43,7 @@ public class DriveConfig {
             logger.info("ActionLog.getDrive.success");
             return drive;
         } catch (GeneralSecurityException | IOException exception) {
-            exception.printStackTrace();
+            logger.error("ActionLog.getDrive.exception", exception);
         }
         logger.info("ActionLog.getDrive.end");
         return null;

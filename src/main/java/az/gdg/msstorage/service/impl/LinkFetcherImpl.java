@@ -28,55 +28,57 @@ import com.google.api.services.drive.model.Permission;
 public class LinkFetcherImpl implements LinkFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(LinkFetcherImpl.class);
+    private static final String BASE_LINK = "https://drive.google.com/uc?id=";
 
     @Override
     public Map<String, String> getImages() {
+        logger.info("ActionLog.getImages.start");
         String folderName = "team-images";
         String mimeType = "image/";
         List<File> files;
         Map<String, String> links = new HashMap<>();
-        String baseLink = "https://drive.google.com/uc?id=";
-
         try {
             files = getFilesInParticularFolder(folderName, mimeType);
             for (File f : files) {
                 if (Boolean.FALSE.equals(f.getTrashed())) {
-                    String link = baseLink + f.getId();
-                    logger.info(f.getName());
+                    String link = BASE_LINK + f.getId();
                     links.put(f.getName(), link);
-                    logger.info(f.getWebViewLink());
                 }
             }
+            logger.info("ActionLog.getImages.success");
         } catch (IOException exception) {
-            exception.getStackTrace();
+            logger.error("ActionLog.getImages.exception", exception);
         }
+        logger.info("ActionLog.getImages.end");
         return links;
     }
 
     @Override
     public JSONObject getTermsAndConditions() {
+        logger.info("ActionLog.getTermsAndConditions.start");
         String folderName = "GDG Terms and Conditions";
         String mimeType = "application/pdf";
-        String baseLink = "https://drive.google.com/uc?id=";
         JSONObject jsonObject = new JSONObject();
         File file;
         try {
             file = getFilesInParticularFolder(folderName, mimeType).get(0);
             if (Boolean.FALSE.equals(file.getTrashed())) {
-                jsonObject.put("termsAndConditions", baseLink + file.getId());
+                jsonObject.put("termsAndConditions", BASE_LINK + file.getId());
+                logger.info("ActionLog.getTermsAndConditions.success");
                 return jsonObject;
             }
         } catch (IOException exception) {
-            exception.getStackTrace();
+            logger.error("ActionLog.getTermsAndConditions.exception", exception);
         }
+        logger.info("ActionLog.getTermsAndConditions.end");
         return jsonObject;
     }
 
     @Override
     public JSONObject uploadFile(String folderName, MultipartFile multipartFile) {
+        logger.info("ActionLog.uploadFile.start");
         DriveConfig driveConfig = new DriveConfig();
         JSONObject jsonObject = new JSONObject();
-        String uploadedFileLink = "https://drive.google.com/uc?id=";
         String fileName = UUID.randomUUID().toString();
         String parentFolderId = getFolderIdByName(folderName);
 
@@ -95,28 +97,34 @@ public class LinkFetcherImpl implements LinkFetcher {
                             new ByteArrayInputStream(multipartFile.getBytes())))
                     .setFields("id")
                     .execute();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            logger.error("ActionLog.uploadFile.exception", exception);
         }
 
         if (file != null) {
-            jsonObject.put("imageUrl", uploadedFileLink + file.getId());
+            jsonObject.put("imageUrl", BASE_LINK + file.getId());
+            logger.info("ActionLog.uploadFile.success");
             return jsonObject;
         }
+        logger.info("ActionLog.uploadFile.end");
         throw new FileCreationException("File couldn't be created");
     }
 
     @Override
     public void deleteFile(String id) {
+        logger.info("ActionLog.deleteFile.start with id {}", id);
         DriveConfig driveConfig = new DriveConfig();
         try {
             driveConfig.getDrive().files().delete(id).execute();
+            logger.info("ActionLog.deleteFile.success with id {}", id);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("ActionLog.deleteFile.exception", e);
         }
+        logger.info("ActionLog.deleteFile.end with id {}", id);
     }
 
     public String createFolder(String folderName) {
+        logger.info("ActionLog.createFolder.start with folderName {}", folderName);
         DriveConfig driveConfig = new DriveConfig();
 
         Permission adminPermission = new Permission();
@@ -138,15 +146,18 @@ public class LinkFetcherImpl implements LinkFetcher {
             driveConfig.getDrive().permissions().create(file.getId(), adminPermission).execute();
             driveConfig.getDrive().permissions().create(file.getId(), userPermission).execute();
         } catch (IOException exception) {
-            exception.printStackTrace();
+            logger.error("ActionLog.createFolder.exception", exception);
         }
         if (file != null) {
+            logger.info("ActionLog.createFolder.success with folderName {}", folderName);
             return file.getId();
         }
+        logger.info("ActionLog.createFolder.end with folderName {}", folderName);
         throw new FileCreationException("Folder couldn't be created");
     }
 
     private List<File> getFilesInParticularFolder(String folderName, String mimeType) throws IOException {
+        logger.info("ActionLog.getFilesInParticularFolder.start with folderName {}", folderName);
         DriveConfig driveConfig = new DriveConfig();
         String folderId = getFolderIdByName(folderName);
 
@@ -157,12 +168,15 @@ public class LinkFetcherImpl implements LinkFetcher {
 
         List<File> files = result.getFiles();
         if (files != null && !files.isEmpty()) {
+            logger.info("ActionLog.getFilesInParticularFolder.success with folderName {}", folderName);
             return files;
         }
+        logger.info("ActionLog.getFilesInParticularFolder.end with folderName {}", folderName);
         throw new NoFilesFoundException("There is no file in requested folder");
     }
 
     private String getFolderIdByName(String folderName) {
+        logger.info("ActionLog.getFolderIdByName.start with folderName {}", folderName);
         DriveConfig driveConfig = new DriveConfig();
         FileList folders = null;
         try {
@@ -173,11 +187,13 @@ public class LinkFetcherImpl implements LinkFetcher {
                     .execute();
 
         } catch (IOException exception) {
-            exception.printStackTrace();
+            logger.error("ActionLog.getFolderIdByName.exception", exception);
         }
         if (folders != null && !folders.getFiles().isEmpty()) {
+            logger.info("ActionLog.getFolderIdByName.success with folderName {}", folderName);
             return folders.getFiles().get(0).getId();
         }
+        logger.info("ActionLog.getFolderIdByName.end with folderName {}", folderName);
         return "";
     }
 }
