@@ -32,7 +32,7 @@ public class LinkFetcherImpl implements LinkFetcher {
         String baseLink = "https://drive.google.com/uc?id=";
 
         try {
-            files = getFiles(folderName, mimeType);
+            files = getFilesInParticularFolder(folderName, mimeType);
             for (File f : files) {
                 if (Boolean.FALSE.equals(f.getTrashed())) {
                     String link = baseLink + f.getId();
@@ -41,7 +41,7 @@ public class LinkFetcherImpl implements LinkFetcher {
                     logger.info(f.getWebViewLink());
                 }
             }
-        } catch (IOException | GeneralSecurityException exception) {
+        } catch (IOException exception) {
             exception.getStackTrace();
         }
         return links;
@@ -55,39 +55,50 @@ public class LinkFetcherImpl implements LinkFetcher {
         JSONObject jsonObject = new JSONObject();
         File file;
         try {
-            file = getFiles(folderName, mimeType).get(0);
+            file = getFilesInParticularFolder(folderName, mimeType).get(0);
             if (Boolean.FALSE.equals(file.getTrashed())) {
                 jsonObject.put("termsAndConditions", baseLink + file.getId());
                 return jsonObject;
             }
-        } catch (IOException | GeneralSecurityException exception) {
+        } catch (IOException exception) {
             exception.getStackTrace();
         }
         return jsonObject;
     }
 
 
-    private List<File> getFiles(String folderName, String mimeType) throws GeneralSecurityException, IOException {
+    private List<File> getFilesInParticularFolder(String folderName, String mimeType) throws IOException {
         DriveConfig driveConfig = new DriveConfig();
-        FileList folder = driveConfig.getDrive().files().list()
-                .setQ("mimeType='application/vnd.google-apps.folder' and name='" + folderName + "' and trashed=false")
-                .setPageSize(1)
-                .setFields("nextPageToken, files(id, name)")
+        String folderId = getFolderIdByName(folderName);
+
+        FileList result = driveConfig.getDrive().files().list()
+                .setQ("'" + folderId + "' in parents and mimeType contains '" + mimeType + "'")
+                .setFields("nextPageToken, files(id, trashed, name, mimeType)")
                 .execute();
 
-        if (folder.getFiles() != null && !folder.getFiles().isEmpty()) {
-            FileList result = driveConfig.getDrive().files().list()
-                    .setQ("'" + folder.getFiles().get(0)
-                            .getId() + "' in parents and mimeType contains '" + mimeType + "'")
-                    .setFields("nextPageToken, files(id, trashed, name, mimeType, thumbnailLink, webViewLink)")
-                    .execute();
-
-            List<File> files = result.getFiles();
-
-            if (files != null && !files.isEmpty()) {
-                return files;
-            }
+        List<File> files = result.getFiles();
+        if (files != null && !files.isEmpty()) {
+            return files;
         }
         throw new NoFilesFoundException("There is no file in requested folder");
+    }
+
+    private String getFolderIdByName(String folderName) {
+        DriveConfig driveConfig = new DriveConfig();
+        FileList folders = null;
+        try {
+            folders = driveConfig.getDrive().files().list()
+                    .setQ("mimeType='application/vnd.google-apps.folder' and name='" + folderName + "' and trashed=false")
+                    .setPageSize(1)
+                    .setFields("nextPageToken, files(id, name)")
+                    .execute();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+        if (folders != null && !folders.getFiles().isEmpty()) {
+            return folders.getFiles().get(0).getId();
+        }
+        return "";
     }
 }
