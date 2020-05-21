@@ -14,4 +14,6 @@ public interface StorageService {
     JSONObject uploadFile(String folderName, MultipartFile multipartFile);
 
     void deleteFile(String id);
+
+    void trashFile(String id);
 }
