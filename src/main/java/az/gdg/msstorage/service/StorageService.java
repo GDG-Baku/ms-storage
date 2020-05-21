@@ -5,7 +5,7 @@ import java.util.Map;
 import org.json.simple.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface LinkFetcher {
+public interface StorageService {
 
     Map<String, String> getImages();
 

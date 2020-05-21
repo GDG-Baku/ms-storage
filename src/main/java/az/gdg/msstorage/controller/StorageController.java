@@ -1,6 +1,6 @@
 package az.gdg.msstorage.controller;
 
-import az.gdg.msstorage.service.LinkFetcher;
+import az.gdg.msstorage.service.StorageService;
 
 import java.util.Map;
 
@@ -22,20 +22,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/storage")
-public class LinkFetcherController {
-    private static final Logger logger = LoggerFactory.getLogger(LinkFetcherController.class);
+public class StorageController {
+    private static final Logger logger = LoggerFactory.getLogger(StorageController.class);
 
-    private final LinkFetcher linkFetcher;
+    private final StorageService storageService;
 
-    public LinkFetcherController(LinkFetcher linkFetcher) {
-        this.linkFetcher = linkFetcher;
+    public StorageController(StorageService storageService) {
+        this.storageService = storageService;
     }
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @GetMapping("/team-images")
     public ResponseEntity<Map<String, String>> getImages() {
         logger.debug("Get images start");
-        return new ResponseEntity<>(linkFetcher.getImages(), HttpStatus.OK);
+        return new ResponseEntity<>(storageService.getImages(), HttpStatus.OK);
     }
 
 
@@ -43,7 +43,7 @@ public class LinkFetcherController {
     @GetMapping("/terms-and-conditions")
     public ResponseEntity<JSONObject> getTermsAndConditions() {
         logger.debug("Get terms and conditions start");
-        return new ResponseEntity<>(linkFetcher.getTermsAndConditions(), HttpStatus.OK);
+        return new ResponseEntity<>(storageService.getTermsAndConditions(), HttpStatus.OK);
     }
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
@@ -51,14 +51,14 @@ public class LinkFetcherController {
     public ResponseEntity<JSONObject> uploadFile(@RequestParam String folderName,
                                                  @RequestPart MultipartFile multipartFile) {
         logger.debug("Upload file to folderName {} start", folderName);
-        return new ResponseEntity<>(linkFetcher.uploadFile(folderName, multipartFile), HttpStatus.OK);
+        return new ResponseEntity<>(storageService.uploadFile(folderName, multipartFile), HttpStatus.OK);
     }
 
     @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @DeleteMapping("/delete/{id}")
     public void deleteFile(@PathVariable String id) {
         logger.debug("Delete file by id {} start", id);
-        linkFetcher.deleteFile(id);
+        storageService.deleteFile(id);
     }
 }
 

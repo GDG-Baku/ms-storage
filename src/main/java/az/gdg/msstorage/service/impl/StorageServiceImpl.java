@@ -2,7 +2,7 @@ package az.gdg.msstorage.service.impl;
 
 import az.gdg.msstorage.exception.FileCreationException;
 import az.gdg.msstorage.exception.NoFilesFoundException;
-import az.gdg.msstorage.service.LinkFetcher;
+import az.gdg.msstorage.service.StorageService;
 import az.gdg.msstorage.util.DriveUtil;
 
 import java.io.ByteArrayInputStream;
@@ -25,9 +25,9 @@ import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.Permission;
 
 @Service
-public class LinkFetcherImpl implements LinkFetcher {
+public class StorageServiceImpl implements StorageService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LinkFetcherImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(StorageServiceImpl.class);
     private static final String BASE_LINK = "https://drive.google.com/uc?id=";
 
     @Override
