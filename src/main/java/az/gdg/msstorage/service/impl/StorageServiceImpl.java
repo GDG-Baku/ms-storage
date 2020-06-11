@@ -207,7 +207,8 @@ public class StorageServiceImpl implements StorageService {
         FileList folders = null;
         try {
             folders = DRIVE.files().list()
-                    .setQ("mimeType='application/vnd.google-apps.folder' and name='" + folderName + "' and trashed=false")
+                    .setQ("mimeType='application/vnd.google-apps.folder' and name='" +
+                            folderName + "' and trashed=false")
                     .setPageSize(1)
                     .setFields("nextPageToken, files(id, name)")
                     .execute();

@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/storage")
+@CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
 public class StorageController {
     private static final Logger logger = LoggerFactory.getLogger(StorageController.class);
 
@@ -32,22 +33,18 @@ public class StorageController {
         this.storageService = storageService;
     }
 
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @GetMapping("/team-images")
     public ResponseEntity<Map<String, String>> getImages() {
         logger.debug("Get images start");
         return new ResponseEntity<>(storageService.getImages(), HttpStatus.OK);
     }
 
-
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @GetMapping("/terms-and-conditions")
     public ResponseEntity<JSONObject> getTermsAndConditions() {
         logger.debug("Get terms and conditions start");
         return new ResponseEntity<>(storageService.getTermsAndConditions(), HttpStatus.OK);
     }
 
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @PostMapping("/upload")
     public ResponseEntity<JSONObject> uploadFile(@RequestParam String folderName,
                                                  @RequestPart MultipartFile multipartFile) {
@@ -55,14 +52,12 @@ public class StorageController {
         return new ResponseEntity<>(storageService.uploadFile(folderName, multipartFile), HttpStatus.OK);
     }
 
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @DeleteMapping("/delete/{id}")
     public void deleteFile(@PathVariable String id) {
         logger.debug("Delete file by id {} start", id);
         storageService.deleteFile(id);
     }
 
-    @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
     @PutMapping("/trash/{id}")
     public void trashFile(@PathVariable String id) {
         logger.debug("Trash file by id {} start", id);

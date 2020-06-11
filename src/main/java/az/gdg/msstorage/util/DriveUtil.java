@@ -20,6 +20,10 @@ import com.google.api.services.drive.DriveScopes;
 
 public class DriveUtil {
 
+    private DriveUtil() {
+
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(DriveUtil.class);
 
     private static final String APPLICATION_NAME = "ms-storage";
