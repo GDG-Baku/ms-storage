@@ -47,9 +47,8 @@ public class DriveUtil {
             logger.info("ActionLog.getDrive.success");
             return drive;
         } catch (GeneralSecurityException | IOException exception) {
-            logger.error("ActionLog.getDrive.exception", exception);
+            logger.info("ActionLog.getDrive.end");
+            return null;
         }
-        logger.info("ActionLog.getDrive.end");
-        return null;
     }
 }

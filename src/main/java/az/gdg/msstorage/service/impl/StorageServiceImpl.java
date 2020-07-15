@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.Permission;
@@ -31,7 +30,6 @@ public class StorageServiceImpl implements StorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(StorageServiceImpl.class);
     private static final String BASE_LINK = "https://drive.google.com/uc?id=";
-    private static final Drive DRIVE = DriveUtil.getDrive();
 
     @Override
     public Map<String, String> getImages() {
@@ -97,7 +95,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             fileUrls = new ArrayList<>();
             for (MultipartFile multipartFile : multipartFiles) {
-                file = DRIVE.files().create(fileMetadata,
+                file = DriveUtil.getDrive().files().create(fileMetadata,
                         new InputStreamContent(multipartFile.getContentType(),
                                 new ByteArrayInputStream(multipartFile.getBytes())))
                         .setFields("id")
@@ -123,7 +121,7 @@ public class StorageServiceImpl implements StorageService {
         logger.info("ActionLog.deleteFile.start with id {}", id);
         try {
             if (getFileById(id) != null) {
-                DRIVE.files().delete(id).execute();
+                DriveUtil.getDrive().files().delete(id).execute();
             } else {
                 throw new NoFilesFoundException("File doesn't exist with this id " + id);
             }
@@ -151,7 +149,7 @@ public class StorageServiceImpl implements StorageService {
         logger.info("ActionLog.isFileExist.start with id {}", id);
         File file = null;
         try {
-            file = DRIVE.files().get(id).execute();
+            file = DriveUtil.getDrive().files().get(id).execute();
         } catch (IOException exception) {
             logger.error("ActionLog.isFileExist.exception", exception);
         }
@@ -177,9 +175,9 @@ public class StorageServiceImpl implements StorageService {
 
         File file = null;
         try {
-            file = DRIVE.files().create(fileMetadata).execute();
-            DRIVE.permissions().create(file.getId(), adminPermission).execute();
-            DRIVE.permissions().create(file.getId(), userPermission).execute();
+            file = DriveUtil.getDrive().files().create(fileMetadata).execute();
+            DriveUtil.getDrive().permissions().create(file.getId(), adminPermission).execute();
+            DriveUtil.getDrive().permissions().create(file.getId(), userPermission).execute();
         } catch (IOException exception) {
             logger.error("ActionLog.createFolder.exception", exception);
         }
@@ -195,7 +193,7 @@ public class StorageServiceImpl implements StorageService {
         logger.info("ActionLog.getFilesInParticularFolder.start with folderName {}", folderName);
         String folderId = getFolderIdByName(folderName);
 
-        FileList result = DRIVE.files().list()
+        FileList result = DriveUtil.getDrive().files().list()
                 .setQ("'" + folderId + "' in parents and mimeType contains '" + mimeType + "'")
                 .setFields("nextPageToken, files(id, trashed, name, mimeType)")
                 .execute();
@@ -213,7 +211,7 @@ public class StorageServiceImpl implements StorageService {
         logger.info("ActionLog.getFolderIdByName.start with folderName {}", folderName);
         FileList folders = null;
         try {
-            folders = DRIVE.files().list()
+            folders = DriveUtil.getDrive().files().list()
                     .setQ("mimeType='application/vnd.google-apps.folder' and name='" +
                             folderName + "' and trashed=false")
                     .setPageSize(1)
