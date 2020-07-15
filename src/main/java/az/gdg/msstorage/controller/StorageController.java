@@ -2,6 +2,7 @@ package az.gdg.msstorage.controller;
 
 import az.gdg.msstorage.service.StorageService;
 
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -47,9 +48,9 @@ public class StorageController {
 
     @PostMapping("/upload")
     public ResponseEntity<JSONObject> uploadFile(@RequestParam String folderName,
-                                                 @RequestPart MultipartFile multipartFile) {
+                                                 @RequestPart("files") List<MultipartFile> multipartFiles) {
         logger.debug("Upload file to folderName {} start", folderName);
-        return new ResponseEntity<>(storageService.uploadFile(folderName, multipartFile), HttpStatus.OK);
+        return new ResponseEntity<>(storageService.uploadFile(folderName, multipartFiles), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

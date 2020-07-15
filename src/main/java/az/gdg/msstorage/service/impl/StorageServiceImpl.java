@@ -7,6 +7,7 @@ import az.gdg.msstorage.util.DriveUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -77,9 +78,10 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public JSONObject uploadFile(String folderName, MultipartFile multipartFile) {
+    public JSONObject uploadFile(String folderName, List<MultipartFile> multipartFiles) {
         logger.info("ActionLog.uploadFile.start");
         JSONObject jsonObject = new JSONObject();
+        List<String> fileUrls = null;
         String fileName = UUID.randomUUID().toString();
         String parentFolderId = getFolderIdByName(folderName);
 
@@ -93,17 +95,22 @@ public class StorageServiceImpl implements StorageService {
 
         File file = null;
         try {
-            file = DRIVE.files().create(fileMetadata,
-                    new InputStreamContent(multipartFile.getContentType(),
-                            new ByteArrayInputStream(multipartFile.getBytes())))
-                    .setFields("id")
-                    .execute();
+            fileUrls = new ArrayList<>();
+            for (MultipartFile multipartFile : multipartFiles) {
+                file = DRIVE.files().create(fileMetadata,
+                        new InputStreamContent(multipartFile.getContentType(),
+                                new ByteArrayInputStream(multipartFile.getBytes())))
+                        .setFields("id")
+                        .execute();
+                fileUrls.add(BASE_LINK + file.getId());
+            }
+
         } catch (IOException exception) {
             logger.error("ActionLog.uploadFile.exception", exception);
         }
 
         if (file != null) {
-            jsonObject.put("imageUrl", BASE_LINK + file.getId());
+            jsonObject.put("imageUrl", fileUrls);
             logger.info("ActionLog.uploadFile.success");
             return jsonObject;
         }

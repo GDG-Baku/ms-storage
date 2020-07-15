@@ -1,5 +1,6 @@
 package az.gdg.msstorage.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -11,7 +12,7 @@ public interface StorageService {
 
     JSONObject getTermsAndConditions();
 
-    JSONObject uploadFile(String folderName, MultipartFile multipartFile);
+    JSONObject uploadFile(String folderName, List<MultipartFile> multipartFiles);
 
     void deleteFile(String id);
 
